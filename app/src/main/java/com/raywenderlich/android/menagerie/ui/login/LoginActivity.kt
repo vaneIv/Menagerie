@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.updateLayoutParams
 import com.raywenderlich.android.menagerie.databinding.ActivityLoginBinding
 import com.raywenderlich.android.menagerie.ui.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,15 +46,23 @@ class LoginActivity : AppCompatActivity(), LoginView {
         binding.progressBar.alpha = 0f
         binding.progressBar.visibility = View.VISIBLE
 
+        val buttonWidth = binding.loginButton.width
+        val buttonHeight = binding.loginButton.height
+
         val alphaAnimator = ValueAnimator.ofFloat(0f, 1f)
         alphaAnimator.duration = 1000
 
         alphaAnimator.addUpdateListener {
             // Reading the current animated value as Float number.
-            val animationAlpha = it.animatedValue as Float
+            val animatedValue = it.animatedValue as Float
 
-            binding.progressBar.alpha = animationAlpha
-            binding.loginButton.alpha = 1 - animationAlpha
+            binding.progressBar.alpha = animatedValue
+            binding.loginButton.alpha = 1 - animatedValue * 1.5f
+
+            binding.loginButton.updateLayoutParams {
+                this.height = (buttonHeight * (1f - animatedValue)).toInt()
+                this.width = (buttonWidth * (1f - animatedValue)).toInt()
+            }
         }
 
         alphaAnimator.start()
