@@ -3,8 +3,11 @@ package com.raywenderlich.android.menagerie.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.ViewAnimationUtils
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.doOnLayout
 import com.raywenderlich.android.menagerie.R
 import com.raywenderlich.android.menagerie.databinding.ActivitySettingsBinding
 import com.raywenderlich.android.menagerie.ui.login.LoginActivity
@@ -24,8 +27,39 @@ class SettingsActivity : AppCompatActivity(), SettingsView {
         super.onCreate(savedInstanceState)
         settingsViewModel.setView(this)
         setContentView(binding.root)
+        overridePendingTransition(0, 0)
         setupUi()
-        // Todo enter animation
+        setupCircularReveal(savedInstanceState)
+    }
+
+    private fun setupCircularReveal(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) {
+            binding.settingsRoot.visibility = View.INVISIBLE
+
+            binding.settingsRoot.doOnLayout {
+                revealCircular()
+            }
+        }
+    }
+
+    private fun revealCircular() {
+        val rootHeight = binding.settingsRoot.height
+
+        val centerX = binding.settingsButton.x
+        val centerY = binding.settingsButton.y / 2
+
+        val circularReveal = ViewAnimationUtils.createCircularReveal(
+            binding.settingsRoot,
+            centerX.toInt(),
+            centerY.toInt(),
+            0f,
+            rootHeight.toFloat()
+        )
+
+        circularReveal.duration = 1000
+
+        binding.settingsRoot.visibility = View.VISIBLE
+        circularReveal.start()
     }
 
     private fun setupUi() {
