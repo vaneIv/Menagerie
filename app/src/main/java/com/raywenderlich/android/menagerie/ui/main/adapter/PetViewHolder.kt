@@ -28,8 +28,12 @@ class PetViewHolder(
                 binding.petAvatar,
                 itemView.resources.getString(R.string.transformationPetAvatar)
             )
+            val petSleep: Pair<View, String> = Pair.create(
+                binding.petSleep,
+                itemView.resources.getString(R.string.transformationPetSleep)
+            )
 
-            onItemClick(data, arrayOf(petAvatar))
+            onItemClick(data, arrayOf(petAvatar, petSleep))
         }
     }
 }

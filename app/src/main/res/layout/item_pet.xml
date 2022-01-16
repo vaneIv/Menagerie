@@ -23,6 +23,7 @@
         android:padding="@dimen/defaultMargin"
         android:textSize="@dimen/itemPetNameTextSize"
         android:textStyle="bold"
+        android:transitionName="@string/transformationPetSleep"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/petSleep"
         app:layout_constraintStart_toEndOf="@id/petAvatar"
