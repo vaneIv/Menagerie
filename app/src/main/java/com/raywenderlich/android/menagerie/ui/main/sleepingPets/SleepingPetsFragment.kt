@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,36 +18,41 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SleepingPetsFragment : Fragment(), SleepingPetsView {
 
-  private var binding: FragmentSleepingPetsBinding? = null
-  private val adapter by lazy { PetAdapter(::onSleepingPetClick, viewModel::onPetSleepClick) }
-  private val viewModel by viewModels<SleepingPetsViewModel>()
+    private var binding: FragmentSleepingPetsBinding? = null
+    private val adapter by lazy { PetAdapter(::onSleepingPetClick, viewModel::onPetSleepClick) }
+    private val viewModel by viewModels<SleepingPetsViewModel>()
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    binding = FragmentSleepingPetsBinding.inflate(inflater, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentSleepingPetsBinding.inflate(inflater, container, false)
 
-    return binding?.root
-  }
+        return binding?.root
+    }
 
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    viewModel.setView(this)
-    val petList = binding?.petList ?: return
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel.setView(this)
+        val petList = binding?.petList ?: return
 
-    petList.layoutManager = LinearLayoutManager(requireActivity())
-    petList.adapter = adapter
+        petList.layoutManager = LinearLayoutManager(requireActivity())
+        petList.adapter = adapter
 
-    viewModel.sleepingPets.observe(viewLifecycleOwner, { sleepingPets ->
-      if (sleepingPets != null) {
-        adapter.setData(sleepingPets)
-      }
-    })
-  }
+        viewModel.sleepingPets.observe(viewLifecycleOwner, { sleepingPets ->
+            if (sleepingPets != null) {
+                adapter.setData(sleepingPets)
+            }
+        })
+    }
 
-  private fun onSleepingPetClick(pet: Pet) {
-    startActivity(PetDetailsActivity.getIntent(requireActivity(), pet))
-  }
+    private fun onSleepingPetClick(pet: Pet, pairs: Array<Pair<View, String>>) {
+        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+            requireActivity(),
+            *pairs
+        )
+
+        startActivity(PetDetailsActivity.getIntent(requireActivity(), pet), options.toBundle())
+    }
 }
