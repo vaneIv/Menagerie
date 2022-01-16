@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -37,48 +38,16 @@ class LoginActivity : AppCompatActivity(), LoginView {
     }
 
     private fun setupUi() {
-        binding.loginButton.setOnClickListener {
-            binding.progressBar.visibility = View.VISIBLE
+        binding.loginButton.onClick {
             loginViewModel.logIn()
-            animateLogin()
-        }
-    }
 
-    private fun animateLogin() {
-        // Making progress bar visible and changing its alpha to be fully transparent.
-        binding.progressBar.alpha = 0f
-        binding.progressBar.visibility = View.VISIBLE
-
-        val progressBarAlphaAnimator =
-            ObjectAnimator.ofFloat(binding.progressBar, "alpha", 0f, 1f)
-        progressBarAlphaAnimator.duration = 2000
-        progressBarAlphaAnimator.interpolator = AccelerateDecelerateInterpolator()
-
-        val loginButtonAnimator = ValueAnimator.ofFloat(0f, 1f)
-        loginButtonAnimator.duration = 2000
-        loginButtonAnimator.interpolator = BounceInterpolator()
-
-        val buttonWidth = binding.loginButton.width
-        val buttonHeight = binding.loginButton.height
-
-        loginButtonAnimator.addUpdateListener {
-            // Reading the current animated value as Float number.
-            val animatedValue = it.animatedValue as Float
-
-            binding.loginButton.alpha = 1 - animatedValue * 1.5f
-
-            binding.loginButton.updateLayoutParams {
-                this.height = (buttonHeight * (1f - animatedValue)).toInt()
-                this.width = (buttonWidth * (1f - animatedValue)).toInt()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                binding.loginButton.transformToProgress()
             }
         }
-
-        loginButtonAnimator.start()
-        progressBarAlphaAnimator.start()
     }
 
     override fun onLoggedIn() { // todo button animation, transition, progress
-        binding.progressBar.visibility = View.GONE
         startActivity(MainActivity.getIntent(this))
     }
 }
