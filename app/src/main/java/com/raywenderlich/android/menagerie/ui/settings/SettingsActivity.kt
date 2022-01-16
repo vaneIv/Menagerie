@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.raywenderlich.android.menagerie.R
 import com.raywenderlich.android.menagerie.databinding.ActivitySettingsBinding
 import com.raywenderlich.android.menagerie.ui.login.LoginActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,50 +13,50 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity(), SettingsView {
 
-  private val binding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
-  private val settingsViewModel by viewModels<SettingsViewModel>()
+    private val binding by lazy { ActivitySettingsBinding.inflate(layoutInflater) }
+    private val settingsViewModel by viewModels<SettingsViewModel>()
 
-  companion object {
-    fun getIntent(context: Context) = Intent(context, SettingsActivity::class.java)
-  }
+    companion object {
+        fun getIntent(context: Context) = Intent(context, SettingsActivity::class.java)
+    }
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    settingsViewModel.setView(this)
-    setContentView(binding.root)
-    setupUi()
-    // Todo enter animation
-  }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        settingsViewModel.setView(this)
+        setContentView(binding.root)
+        setupUi()
+        // Todo enter animation
+    }
 
-  private fun setupUi() {
-    binding.settingsButton.setOnClickListener { exitCircular() }
-    binding.sleepAllPets.setOnClickListener { settingsViewModel.putAllPetsToBed() }
-    binding.wakeAllPets.setOnClickListener { settingsViewModel.wakeUpAllPets() }
-    binding.logOut.setOnClickListener { settingsViewModel.logOut() }
+    private fun setupUi() {
+        binding.settingsButton.setOnClickListener { exitCircular() }
+        binding.sleepAllPets.setOnClickListener { settingsViewModel.putAllPetsToBed() }
+        binding.wakeAllPets.setOnClickListener { settingsViewModel.wakeUpAllPets() }
+        binding.logOut.setOnClickListener { settingsViewModel.logOut() }
 
-    settingsViewModel.sleepingPets.observe(this, { sleepingPets ->
-      if (sleepingPets != null && sleepingPets.isNotEmpty()) {
-        val allPetsSleeping = sleepingPets.all { it.isSleeping }
-        val isAnyPetAsleep = sleepingPets.any { it.isSleeping }
+        settingsViewModel.sleepingPets.observe(this, { sleepingPets ->
+            if (sleepingPets != null && sleepingPets.isNotEmpty()) {
+                val allPetsSleeping = sleepingPets.all { it.isSleeping }
+                val isAnyPetAsleep = sleepingPets.any { it.isSleeping }
 
-        binding.sleepAllPets.isEnabled = !allPetsSleeping
-        binding.wakeAllPets.isEnabled = isAnyPetAsleep
-      } else {
-        binding.sleepAllPets.isEnabled = true
-        binding.wakeAllPets.isEnabled = false
-      }
-    })
-  }
+                binding.sleepAllPets.isEnabled = !allPetsSleeping
+                binding.wakeAllPets.isEnabled = isAnyPetAsleep
+            } else {
+                binding.sleepAllPets.isEnabled = true
+                binding.wakeAllPets.isEnabled = false
+            }
+        })
+    }
 
-  override fun onUserLoggedOut() {
-    // TODO transition
-    startActivity(LoginActivity.getIntent(this))
-  }
+    override fun onUserLoggedOut() {
+        startActivity(LoginActivity.getIntent(this))
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+    }
 
-  override fun onBackPressed() = exitCircular()
+    override fun onBackPressed() = exitCircular()
 
-  private fun exitCircular() {
-    // TODO animation
-    finish()
-  }
+    private fun exitCircular() {
+        // TODO animation
+        finish()
+    }
 }

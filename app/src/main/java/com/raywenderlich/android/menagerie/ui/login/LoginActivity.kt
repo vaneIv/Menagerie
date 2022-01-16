@@ -56,6 +56,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
     override fun showPets() {
         startActivity(MainActivity.getIntent(this))
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 }
