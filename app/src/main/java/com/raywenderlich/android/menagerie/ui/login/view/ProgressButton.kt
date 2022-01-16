@@ -10,11 +10,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import androidx.core.animation.doOnEnd
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
 import com.raywenderlich.android.menagerie.databinding.ViewProgressButtonBinding
 
 class ProgressButton : FrameLayout {
+
+    private val animations = mutableListOf<ValueAnimator>()
 
     val binding by lazy {
         ViewProgressButtonBinding.inflate(
@@ -24,12 +27,14 @@ class ProgressButton : FrameLayout {
 
     private var initialButtonWidth = 0
     private var targetButtonWidth = 0
+    private var initialTextSize = 0f
 
     init {
         addView(binding.root)
         binding.actionButton.doOnLayout {
             initialButtonWidth = it.measuredWidth
             targetButtonWidth = it.measuredHeight
+            initialTextSize = binding.actionButton.textSize
         }
     }
 
@@ -55,7 +60,9 @@ class ProgressButton : FrameLayout {
         )
         val widthAnimator = ValueAnimator.ofInt(binding.actionButton.measuredWidth, targetWidth)
         val progressBarAlphaAnimator = ObjectAnimator.ofFloat(binding.progressBar, "alpha", 0f, 1f)
+        val textSizeAnimator = ValueAnimator.ofFloat(initialTextSize, 0f)
 
+        textSizeAnimator.duration = 1000
         cornerAnimator.duration = 1000
         widthAnimator.duration = 1000
         progressBarAlphaAnimator.duration = 1000
@@ -69,16 +76,43 @@ class ProgressButton : FrameLayout {
             binding.actionButton.updateLayoutParams {
                 this.width = it.animatedValue as Int
             }
+        }
 
-            binding.actionButton.textSize = it.animatedFraction * binding.actionButton.textSize
+        textSizeAnimator.addUpdateListener {
+            val textSizeSp = (it.animatedValue as Float) / resources.displayMetrics.density
+
+            binding.actionButton.textSize = textSizeSp
         }
 
         binding.progressBar.alpha = 0f
         binding.progressBar.visibility = View.VISIBLE
 
+        animations.addAll(
+            listOf(
+                widthAnimator,
+                cornerAnimator,
+                progressBarAlphaAnimator,
+                textSizeAnimator
+            )
+        )
+
         widthAnimator.start()
         cornerAnimator.start()
         progressBarAlphaAnimator.start()
+        textSizeAnimator.start()
+    }
+
+    fun reverseAnimation(onReverseAnimationEnd: () -> Unit) {
+        animations.forEach { animator ->
+            animator.reverse()
+
+            if (animations.indexOf(animator) == animations.lastIndex) {
+                animator.doOnEnd {
+                    onReverseAnimationEnd()
+                    animations.clear()
+                }
+            }
+        }
     }
 
     inline fun onClick(crossinline onClick: () -> Unit) {

@@ -8,27 +8,27 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LoginViewModel @ViewModelInject constructor(
-  private val menageriePreferences: MenageriePreferences
+    private val menageriePreferences: MenageriePreferences
 ) : ViewModel() {
 
-  private lateinit var view: LoginView
+    private lateinit var view: LoginView
 
-  fun setView(view: LoginView) {
-    this.view = view
-  }
-
-  fun start() {
-    if (menageriePreferences.isUserLoggedIn()) {
-      view.onLoggedIn()
+    fun setView(view: LoginView) {
+        this.view = view
     }
-  }
 
-  fun logIn() {
-    viewModelScope.launch {
-      delay(3000)
-      menageriePreferences.setUserLoggedIn(true)
-
-      view.onLoggedIn()
+    fun start() {
+        if (menageriePreferences.isUserLoggedIn()) {
+            view.showPets()
+        }
     }
-  }
+
+    fun logIn() {
+        viewModelScope.launch {
+            delay(3000)
+            menageriePreferences.setUserLoggedIn(true)
+
+            view.onLoggedIn()
+        }
+    }
 }
