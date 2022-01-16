@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewAnimationUtils
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.addListener
 import androidx.core.view.doOnLayout
 import com.raywenderlich.android.menagerie.R
 import com.raywenderlich.android.menagerie.databinding.ActivitySettingsBinding
@@ -53,7 +54,7 @@ class SettingsActivity : AppCompatActivity(), SettingsView {
             centerX.toInt(),
             centerY.toInt(),
             0f,
-            rootHeight.toFloat()
+            rootHeight.toFloat() * 2f
         )
 
         circularReveal.duration = 1000
@@ -90,7 +91,24 @@ class SettingsActivity : AppCompatActivity(), SettingsView {
     override fun onBackPressed() = exitCircular()
 
     private fun exitCircular() {
-        // TODO animation
-        finish()
+        val rootHeight = binding.settingsRoot.height
+        val centerX = binding.settingsButton.x
+        val centerY = binding.settingsButton.y / 2
+
+        val circularReveal = ViewAnimationUtils.createCircularReveal(
+            binding.settingsRoot,
+            centerX.toInt(),
+            centerY.toInt(),
+            rootHeight * 1.2f,
+            0f
+        )
+
+        circularReveal.duration = 1000
+        circularReveal.addListener(onEnd = {
+            finish()
+            overridePendingTransition(0, 0)
+        })
+
+        circularReveal.start()
     }
 }
