@@ -1,12 +1,13 @@
 package com.raywenderlich.android.menagerie.ui.login
 
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.BounceInterpolator
-import android.view.animation.DecelerateInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.updateLayoutParams
@@ -48,18 +49,22 @@ class LoginActivity : AppCompatActivity(), LoginView {
         binding.progressBar.alpha = 0f
         binding.progressBar.visibility = View.VISIBLE
 
+        val progressBarAlphaAnimator =
+            ObjectAnimator.ofFloat(binding.progressBar, "alpha", 0f, 1f)
+        progressBarAlphaAnimator.duration = 2000
+        progressBarAlphaAnimator.interpolator = AccelerateDecelerateInterpolator()
+
+        val loginButtonAnimator = ValueAnimator.ofFloat(0f, 1f)
+        loginButtonAnimator.duration = 2000
+        loginButtonAnimator.interpolator = BounceInterpolator()
+
         val buttonWidth = binding.loginButton.width
         val buttonHeight = binding.loginButton.height
 
-        val alphaAnimator = ValueAnimator.ofFloat(0f, 1f)
-        alphaAnimator.duration = 2000
-        alphaAnimator.interpolator = BounceInterpolator()
-
-        alphaAnimator.addUpdateListener {
+        loginButtonAnimator.addUpdateListener {
             // Reading the current animated value as Float number.
             val animatedValue = it.animatedValue as Float
 
-            binding.progressBar.alpha = animatedValue
             binding.loginButton.alpha = 1 - animatedValue * 1.5f
 
             binding.loginButton.updateLayoutParams {
@@ -68,7 +73,8 @@ class LoginActivity : AppCompatActivity(), LoginView {
             }
         }
 
-        alphaAnimator.start()
+        loginButtonAnimator.start()
+        progressBarAlphaAnimator.start()
     }
 
     override fun onLoggedIn() { // todo button animation, transition, progress
