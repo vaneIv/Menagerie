@@ -7,6 +7,7 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -16,6 +17,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="@color/design_default_color_primary"
+            app:expandedTitleMarginEnd="@dimen/minActionWidth"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
@@ -37,9 +39,7 @@
                 android:minHeight="@dimen/minActionHeight"
                 android:padding="@dimen/smallPadding"
                 android:src="@drawable/ic_sunny_24"
-                android:transitionName="@string/transformationPetSleep"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:transitionName="@string/transformationPetSleep" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/petDetailsTitle"
@@ -47,9 +47,27 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:title="@string/appName"
-                app:titleTextColor="@color/white" />
+                app:titleMarginEnd="@dimen/minActionWidth"
+                app:titleTextColor="@color/white">
+
+                <ImageView
+                    android:id="@+id/petSleepToolbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    android:layout_marginEnd="@dimen/defaultMargin"
+                    android:layout_marginBottom="@dimen/defaultMargin"
+                    android:alpha="0"
+                    android:scaleType="centerCrop"
+                    android:minWidth="@dimen/minActionWidth"
+                    android:minHeight="@dimen/minActionHeight"
+                    android:padding="@dimen/smallPadding"
+                    android:src="@drawable/ic_sunny_24" />
+
+            </androidx.appcompat.widget.Toolbar>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -100,6 +118,7 @@
                 app:layout_constraintTop_toBottomOf="@id/petName"
                 tools:text="When not causing headaches for developers all over the world, this playful little bug is often found on leaves or trees just hanging around!" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
