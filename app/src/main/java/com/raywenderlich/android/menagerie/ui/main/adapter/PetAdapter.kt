@@ -9,35 +9,44 @@ import com.raywenderlich.android.menagerie.data.model.Pet
 import com.raywenderlich.android.menagerie.databinding.ItemPetBinding
 
 class PetAdapter(
-  private val onItemClick: (Pet, Array<Pair<View, String>>) -> Unit,
-  private val onPetSleepClick: (Pet) -> Unit
+    private val onItemClick: (Pet, Array<Pair<View, String>>) -> Unit,
+    private val onPetSleepClick: (Pet) -> Unit
 ) : RecyclerView.Adapter<PetViewHolder>() {
 
-  private val items = mutableListOf<Pet>()
+    private val items = mutableListOf<Pet>()
 
-  override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = items.size
 
-  fun setData(data: List<Pet>) { // todo item add/remove anim
-    this.items.clear()
-    this.items.addAll(data)
-    notifyDataSetChanged()
-  }
+    fun setData(data: List<Pet>) { // todo item add/remove anim
+        this.items.clear()
+        this.items.addAll(data)
+        notifyDataSetChanged()
+    }
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PetViewHolder {
-    val binding = ItemPetBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PetViewHolder {
+        val binding = ItemPetBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
-    return PetViewHolder(binding)
-  }
+        return PetViewHolder(binding)
+    }
 
-  override fun onBindViewHolder(holder: PetViewHolder, position: Int) {
-    holder.bindData(items[position], onItemClick, onPetSleepClick)
-  }
+    override fun onBindViewHolder(holder: PetViewHolder, position: Int) {
+        holder.bindData(items[position], onItemClick, onPetSleepClick)
+    }
 
-  fun onItemSwiped(position: Int) {
+    fun getItem(position: Int) = items[position]
 
-  }
+    fun onItemSwiped(position: Int) {
+        items.removeAt(position)
+        notifyItemRemoved(position)
+    }
 
-  fun onItemMoved(oldPosition: Int, newPosition: Int) {
+    fun onItemMoved(oldPosition: Int, newPosition: Int) {
+        val itemToReplace = items[oldPosition]
+        items.remove(itemToReplace)
 
-  }
+        val positionToMove = if (oldPosition > newPosition) newPosition else newPosition - 1
+        items.add(positionToMove, itemToReplace)
+
+        notifyItemMoved(oldPosition, positionToMove)
+    }
 }
