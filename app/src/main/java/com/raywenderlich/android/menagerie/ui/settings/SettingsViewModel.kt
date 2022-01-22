@@ -8,36 +8,30 @@ import com.raywenderlich.android.menagerie.repository.PetRepository
 import kotlinx.coroutines.launch
 
 class SettingsViewModel @ViewModelInject constructor(
-  private val menageriePreferences: MenageriePreferences,
-  private val repository: PetRepository
+    private val menageriePreferences: MenageriePreferences,
+    private val repository: PetRepository
 ) : ViewModel() {
 
-  private lateinit var view: SettingsView
+    private lateinit var view: SettingsView
 
-  val sleepingPets by lazy { repository.getSleepingPets() }
+    val pets by lazy { repository.getPets() }
 
-  fun setView(view: SettingsView) {
-    this.view = view
-  }
-
-  fun logOut() {
-    menageriePreferences.setUserLoggedIn(false)
-    view.onUserLoggedOut()
-  }
-
-  fun wakeUpAllPets() {
-    viewModelScope.launch {
-      val pets = repository.getPetData()
-
-      repository.updatePets(pets.map { pet -> pet.copy(isSleeping = false) })
+    fun setView(view: SettingsView) {
+        this.view = view
     }
-  }
 
-  fun putAllPetsToBed() {
-    viewModelScope.launch {
-      val pets = repository.getPetData()
-
-      repository.updatePets(pets.map { pet -> pet.copy(isSleeping = true) })
+    fun logOut() {
+        menageriePreferences.setUserLoggedIn(false)
+        view.onUserLoggedOut()
     }
-  }
+
+    fun onPetSleepTap() {
+        viewModelScope.launch {
+            val pets = repository.getPetData()
+            val arePetsAsleep = pets.all { it.isSleeping }
+            val updatePets = pets.map { it.copy(isSleeping = !arePetsAsleep) }
+
+            repository.updatePets(updatePets)
+        }
+    }
 }

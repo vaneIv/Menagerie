@@ -65,20 +65,24 @@ class SettingsActivity : AppCompatActivity(), SettingsView {
 
     private fun setupUi() {
         binding.settingsButton.setOnClickListener { exitCircular() }
-        binding.sleepAllPets.setOnClickListener { settingsViewModel.putAllPetsToBed() }
-        binding.wakeAllPets.setOnClickListener { settingsViewModel.wakeUpAllPets() }
+        binding.petSleep.setOnClickListener { settingsViewModel.onPetSleepTap() }
         binding.logOut.setOnClickListener { settingsViewModel.logOut() }
+        binding.petSleep.setMaxFrame(140)
 
-        settingsViewModel.sleepingPets.observe(this, { sleepingPets ->
-            if (sleepingPets != null && sleepingPets.isNotEmpty()) {
-                val allPetsSleeping = sleepingPets.all { it.isSleeping }
-                val isAnyPetAsleep = sleepingPets.any { it.isSleeping }
+        settingsViewModel.pets.observe(this, { pets ->
+            val isAnimating = binding.petSleep.isAnimating
 
-                binding.sleepAllPets.isEnabled = !allPetsSleeping
-                binding.wakeAllPets.isEnabled = isAnyPetAsleep
-            } else {
-                binding.sleepAllPets.isEnabled = true
-                binding.wakeAllPets.isEnabled = false
+            if (isAnimating) return@observe
+
+            val arePetsAsleep = pets.all { it.isSleeping }
+            val lottieProgress = binding.petSleep.progress
+
+            if (arePetsAsleep && lottieProgress != 1f) {
+                binding.petSleep.speed = 1f
+                binding.petSleep.playAnimation()
+            } else if (!arePetsAsleep && lottieProgress != 0f) {
+                binding.petSleep.speed = -1f
+                binding.petSleep.playAnimation()
             }
         })
     }

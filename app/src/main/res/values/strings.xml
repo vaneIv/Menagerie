@@ -13,4 +13,5 @@
 
   <string name="transformationPetAvatar">PetAvatar</string>
   <string name="transformationPetSleep">PetSleep</string>
+    <string name="petSleepStatus">Pet Sleep Status</string>
 </resources>

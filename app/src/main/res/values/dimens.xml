@@ -20,4 +20,5 @@
     <dimen name="defaultElevation">2dp</dimen>
     <dimen name="actionButtonSize">56dp</dimen>
     <dimen name="parallaxImageHeight">200dp</dimen>
+    <dimen name="lottieImageSize">64dp</dimen>
 </resources>
