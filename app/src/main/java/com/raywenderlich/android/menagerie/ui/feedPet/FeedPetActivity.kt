@@ -3,12 +3,18 @@ package com.raywenderlich.android.menagerie.ui.feedPet
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.doOnLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
+import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import coil.load
@@ -32,19 +38,47 @@ class FeedPetActivity : AppCompatActivity() {
     private val binding by lazy { ActivityFeedPetBinding.inflate(layoutInflater) }
     private val feedPetViewModel by viewModels<FeedPetViewModel>()
 
-    private var horizontalPositionDifference = 0f
-    private var verticalPositionDifference = 0f
-    private val springForce by lazy {
-        SpringForce(0f).apply {
-            stiffness = SpringForce.STIFFNESS_MEDIUM
-            dampingRatio = SpringForce.DAMPING_RATIO_HIGH_BOUNCY
+    // animation
+    private val cookieFlingAnimationX by lazy {
+        FlingAnimation(binding.cookie, DynamicAnimation.X).setFriction(1f)
+    }
+
+    private val cookieFlingAnimationY by lazy {
+        FlingAnimation(binding.cookie, DynamicAnimation.Y).setFriction(1f)
+    }
+
+    private val cookieGestureListener = object : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onDown(e: MotionEvent?): Boolean = true
+
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent?,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            if (binding.cookie.visibility == View.VISIBLE) {
+                cookieFlingAnimationX.setStartVelocity(velocityX)
+                cookieFlingAnimationY.setStartVelocity(velocityY)
+
+                cookieFlingAnimationX.start()
+                cookieFlingAnimationY.start()
+            }
+
+            return true
         }
+    }
+
+    private val cookieGestureDetector by lazy {
+        GestureDetector(this, cookieGestureListener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setupUi()
+        setupFlingBoxes()
+        setupFlingEndListener()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -60,61 +94,49 @@ class FeedPetActivity : AppCompatActivity() {
             }
         })
 
-        val springChocolateCookieX = SpringAnimation(
-            binding.chocolateCookie,
-            DynamicAnimation.TRANSLATION_X
-        ).setSpring(springForce)
-
-        val springCookieX = SpringAnimation(
-            binding.cookie,
-            DynamicAnimation.TRANSLATION_X
-        ).setSpring(springForce)
-
-        val springChocolateCookieY = SpringAnimation(
-            binding.chocolateCookie,
-            DynamicAnimation.TRANSLATION_Y
-        ).setSpring(springForce)
-
-        val springCookieY = SpringAnimation(
-            binding.cookie,
-            DynamicAnimation.TRANSLATION_Y
-        ).setSpring(springForce)
-
-        binding.chocolateCookie.setOnTouchListener(
-            buildTouchListener(
-                springChocolateCookieX,
-                springChocolateCookieY
-            )
-        )
-        binding.cookie.setOnTouchListener(buildTouchListener(springCookieX, springCookieY))
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun buildTouchListener(
-        springAnimationX: SpringAnimation,
-        springAnimationY: SpringAnimation
-    ) =
-        View.OnTouchListener { view, event ->
-            when (event?.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    horizontalPositionDifference = event.rawX - (view?.x ?: 0f)
-                    verticalPositionDifference = event.rawY - (view?.y ?: 0f)
-
-                    springAnimationX.cancel()
-                    springAnimationY.cancel()
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    view?.x = event.rawX - horizontalPositionDifference
-                    view?.y = event.rawY - verticalPositionDifference
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    springAnimationX.start()
-                    springAnimationY.start()
-                }
-            }
+        binding.cookie.setOnTouchListener { _, event ->
+            cookieGestureDetector.onTouchEvent(event)
 
             true
         }
+    }
+
+    private fun setupFlingBoxes() {
+        binding.cookie.doOnLayout {
+            val displayMetrics = DisplayMetrics()
+            display?.getRealMetrics(displayMetrics)
+
+            val width = displayMetrics.widthPixels
+            val height = displayMetrics.heightPixels
+
+            cookieFlingAnimationX.setMinValue(0f).setMaxValue((width - it.width).toFloat())
+            cookieFlingAnimationY.setMinValue(0f).setMaxValue(height - it.height * 2f)
+        }
+    }
+
+    private fun setupFlingEndListener() {
+        cookieFlingAnimationX.addEndListener { _, _, _, _ ->
+            if (isPetTouchingCookie(binding.cookie, binding.petImage)) {
+                binding.cookie.visibility = View.GONE
+                Toast.makeText(this, "Omnomnonmonmnonm", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        cookieFlingAnimationY.addEndListener { _, _, _, _ ->
+            if (isPetTouchingCookie(binding.cookie, binding.petImage)) {
+                binding.cookie.visibility = View.GONE
+                Toast.makeText(this, "Omnomnonmonmnonm", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun isPetTouchingCookie(cookie: View, pet: View): Boolean {
+        val cookieRect = Rect()
+        cookie.getHitRect(cookieRect)
+
+        val petRect = Rect()
+        pet.getHitRect(petRect)
+
+        return Rect.intersects(cookieRect, petRect)
+    }
 }
