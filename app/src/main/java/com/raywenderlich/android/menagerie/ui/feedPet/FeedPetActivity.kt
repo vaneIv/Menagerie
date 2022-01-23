@@ -33,6 +33,7 @@ class FeedPetActivity : AppCompatActivity() {
     private val feedPetViewModel by viewModels<FeedPetViewModel>()
 
     private var horizontalPositionDifference = 0f
+    private var verticalPositionDifference = 0f
     private val springForce by lazy {
         SpringForce(0f).apply {
             stiffness = SpringForce.STIFFNESS_MEDIUM
@@ -59,35 +60,59 @@ class FeedPetActivity : AppCompatActivity() {
             }
         })
 
-        val springChocolateCookie = SpringAnimation(
+        val springChocolateCookieX = SpringAnimation(
             binding.chocolateCookie,
             DynamicAnimation.TRANSLATION_X
         ).setSpring(springForce)
 
-        val springCookie = SpringAnimation(
+        val springCookieX = SpringAnimation(
             binding.cookie,
             DynamicAnimation.TRANSLATION_X
         ).setSpring(springForce)
 
-        binding.chocolateCookie.setOnTouchListener(buildTouchListener(springChocolateCookie))
-        binding.cookie.setOnTouchListener(buildTouchListener(springCookie))
+        val springChocolateCookieY = SpringAnimation(
+            binding.chocolateCookie,
+            DynamicAnimation.TRANSLATION_Y
+        ).setSpring(springForce)
+
+        val springCookieY = SpringAnimation(
+            binding.cookie,
+            DynamicAnimation.TRANSLATION_Y
+        ).setSpring(springForce)
+
+        binding.chocolateCookie.setOnTouchListener(
+            buildTouchListener(
+                springChocolateCookieX,
+                springChocolateCookieY
+            )
+        )
+        binding.cookie.setOnTouchListener(buildTouchListener(springCookieX, springCookieY))
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun buildTouchListener(springAnimation: SpringAnimation) =
+    private fun buildTouchListener(
+        springAnimationX: SpringAnimation,
+        springAnimationY: SpringAnimation
+    ) =
         View.OnTouchListener { view, event ->
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     horizontalPositionDifference = event.rawX - (view?.x ?: 0f)
+                    verticalPositionDifference = event.rawY - (view?.y ?: 0f)
 
-                    springAnimation.cancel()
+                    springAnimationX.cancel()
+                    springAnimationY.cancel()
                 }
 
                 MotionEvent.ACTION_MOVE -> {
                     view?.x = event.rawX - horizontalPositionDifference
+                    view?.y = event.rawY - verticalPositionDifference
                 }
 
-                MotionEvent.ACTION_UP -> springAnimation.start()
+                MotionEvent.ACTION_UP -> {
+                    springAnimationX.start()
+                    springAnimationY.start()
+                }
             }
 
             true
