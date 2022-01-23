@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.GestureDetector
@@ -11,6 +12,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.doOnLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
@@ -38,13 +40,20 @@ class FeedPetActivity : AppCompatActivity() {
     private val binding by lazy { ActivityFeedPetBinding.inflate(layoutInflater) }
     private val feedPetViewModel by viewModels<FeedPetViewModel>()
 
-    // animation
     private val cookieFlingAnimationX by lazy {
         FlingAnimation(binding.cookie, DynamicAnimation.X).setFriction(1f)
     }
 
     private val cookieFlingAnimationY by lazy {
         FlingAnimation(binding.cookie, DynamicAnimation.Y).setFriction(1f)
+    }
+
+    private val chocolateCookieFlingAnimationX by lazy {
+        FlingAnimation(binding.chocolateCookie, DynamicAnimation.X).setFriction(1f)
+    }
+
+    private val chocolateCookieFlingAnimationY by lazy {
+        FlingAnimation(binding.chocolateCookie, DynamicAnimation.Y).setFriction(1f)
     }
 
     private val cookieGestureListener = object : GestureDetector.SimpleOnGestureListener() {
@@ -69,8 +78,35 @@ class FeedPetActivity : AppCompatActivity() {
         }
     }
 
+    private val chocolateCookieGestureListener =
+        object : GestureDetector.SimpleOnGestureListener() {
+
+            override fun onDown(e: MotionEvent?): Boolean = true
+
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent?,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                if (binding.chocolateCookie.visibility == View.VISIBLE) {
+                    chocolateCookieFlingAnimationX.setStartVelocity(velocityX)
+                    chocolateCookieFlingAnimationY.setStartVelocity(velocityY)
+
+                    chocolateCookieFlingAnimationX.start()
+                    chocolateCookieFlingAnimationY.start()
+                }
+
+                return true
+            }
+        }
+
     private val cookieGestureDetector by lazy {
         GestureDetector(this, cookieGestureListener)
+    }
+
+    private val chocolateCookieGestureDetector by lazy {
+        GestureDetector(this, chocolateCookieGestureListener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,8 +135,15 @@ class FeedPetActivity : AppCompatActivity() {
 
             true
         }
+
+        binding.chocolateCookie.setOnTouchListener { _, event ->
+            chocolateCookieGestureDetector.onTouchEvent(event)
+
+            true
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun setupFlingBoxes() {
         binding.cookie.doOnLayout {
             val displayMetrics = DisplayMetrics()
@@ -110,7 +153,18 @@ class FeedPetActivity : AppCompatActivity() {
             val height = displayMetrics.heightPixels
 
             cookieFlingAnimationX.setMinValue(0f).setMaxValue((width - it.width).toFloat())
-            cookieFlingAnimationY.setMinValue(0f).setMaxValue(height - it.height * 2f)
+            cookieFlingAnimationY.setMinValue(0f).setMaxValue((height - it.height * 2f))
+        }
+
+        binding.chocolateCookie.doOnLayout {
+            val displayMetrics = DisplayMetrics()
+            display?.getRealMetrics(displayMetrics)
+
+            val width = displayMetrics.widthPixels
+            val height = displayMetrics.heightPixels
+
+            chocolateCookieFlingAnimationX.setMinValue(0f).setMaxValue((width - it.width).toFloat())
+            chocolateCookieFlingAnimationY.setMinValue(0f).setMaxValue((height - it.height * 2f))
         }
     }
 
@@ -118,14 +172,28 @@ class FeedPetActivity : AppCompatActivity() {
         cookieFlingAnimationX.addEndListener { _, _, _, _ ->
             if (isPetTouchingCookie(binding.cookie, binding.petImage)) {
                 binding.cookie.visibility = View.GONE
-                Toast.makeText(this, "Omnomnonmonmnonm", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Omomonmonmonm", Toast.LENGTH_SHORT).show()
             }
         }
 
         cookieFlingAnimationY.addEndListener { _, _, _, _ ->
             if (isPetTouchingCookie(binding.cookie, binding.petImage)) {
                 binding.cookie.visibility = View.GONE
-                Toast.makeText(this, "Omnomnonmonmnonm", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Omomonmonmonm", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        chocolateCookieFlingAnimationX.addEndListener { _, _, _, _ ->
+            if (isPetTouchingCookie(binding.chocolateCookie, binding.petImage)) {
+                binding.chocolateCookie.visibility = View.GONE
+                Toast.makeText(this, "Omomonmonmonm", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        chocolateCookieFlingAnimationY.addEndListener { _, _, _, _ ->
+            if (isPetTouchingCookie(binding.chocolateCookie, binding.petImage)) {
+                binding.chocolateCookie.visibility = View.GONE
+                Toast.makeText(this, "Omomonmonmonm", Toast.LENGTH_SHORT).show()
             }
         }
     }
